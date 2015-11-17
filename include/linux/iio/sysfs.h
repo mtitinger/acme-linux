@@ -76,6 +76,15 @@ struct iio_const_attr {
 /* Generic attributes of onetype or another */
 
 /**
+ * IIO_CONST_ATTR_AVERAGING_RATIO_AVAIL - list available averaging ratios
+ * @_string: ratio string for the attribute
+ *
+ * Constant version
+ **/
+#define IIO_CONST_ATTR_AVERAGING_RATIO_AVAIL(_string)                 \
+	IIO_CONST_ATTR(averaging_ratio_available, _string)
+
+/**
  * IIO_DEV_ATTR_SAMP_FREQ - sets any internal clock frequency
  * @_mode: sysfs file mode/permissions
  * @_show: output method for the attribute

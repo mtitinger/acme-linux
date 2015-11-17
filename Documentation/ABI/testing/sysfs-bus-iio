@@ -56,6 +56,19 @@ Description:
 		When the internal sampling clock can only take a small
 		discrete set of values, this file lists those available.
 
+What:		/sys/bus/iio/devices/iio:deviceX/averaging_ratio
+KernelVersion:	4.x.x
+Contact:	linux-iio@vger.kernel.org
+Description:
+		Hardware dependent ADC averaging. Controls the averaging ratio
+		of the digital filter if available.
+
+What:		/sys/bus/iio/devices/iio:deviceX/averaging_ratio_available
+KernelVersion:	4.x.x
+Contact:	linux-iio@vger.kernel.org
+Description:
+		Hardware dependent values supported by the averaging filter.
+
 What:		/sys/bus/iio/devices/iio:deviceX/oversampling_ratio
 KernelVersion:	2.6.38
 Contact:	linux-iio@vger.kernel.org
