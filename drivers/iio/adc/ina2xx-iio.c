@@ -179,7 +179,7 @@ static int ina2xx_read_raw(struct iio_dev *indio_dev,
 
 		return ina2xx_get_value(chip, chan->address, regval, val, val2);
 
-	case IIO_CHAN_INFO_AVERAGE_RAW:
+	case IIO_CHAN_INFO_AVERAGING_RATIO:
 		*val = chip->avg;
 		return IIO_VAL_INT;
 
@@ -218,6 +218,8 @@ static int ina2xx_calibrate(struct ina2xx_chip_info *chip)
  * http://www.ti.com/lit/ds/symlink/ina226.pdf.
  */
 static const int ina226_avg_tab[] = { 1, 4, 16, 64, 128, 256, 512, 1024 };
+
+static IIO_CONST_ATTR_AVERAGING_RATIO_AVAIL("1, 4, 16, 64, 128, 256, 512, 1024");
 
 static unsigned int ina226_set_average(struct ina2xx_chip_info *chip,
 				       unsigned int val,
@@ -286,7 +288,7 @@ static int ina2xx_write_raw(struct iio_dev *indio_dev,
 	tmp = config;
 
 	switch (mask) {
-	case IIO_CHAN_INFO_AVERAGE_RAW:
+	case IIO_CHAN_INFO_AVERAGING_RATIO:
 
 		ret = ina226_set_average(chip, val, &tmp);
 		break;
@@ -308,40 +310,6 @@ _err:
 	return ret;
 }
 
-
-static ssize_t ina2xx_averaging_steps_show(struct device *dev,
-					   struct device_attribute *attr,
-					   char *buf)
-{
-	struct ina2xx_chip_info *chip = iio_priv(dev_to_iio_dev(dev));
-
-	return sprintf(buf, "%d\n", chip->avg);
-}
-
-
-static ssize_t ina2xx_averaging_steps_store(struct device *dev,
-				struct device_attribute *attr,
-				const char *buf, size_t len)
-{
-	unsigned long val;
-	int ret;
-
-	ret = kstrtoul((const char *) buf, 10, &val);
-	if (ret)
-		return -EINVAL;
-
-	/* unexposed missuse of INFO_AVERAGE_RAW, until a proper ABI for the
-	 * averaging steps setting is specified.
-	 */
-	ret  = ina2xx_write_raw(dev_to_iio_dev(dev), NULL, val, 0,
-				IIO_CHAN_INFO_AVERAGE_RAW);
-	if (ret < 0)
-		return ret;
-
-	return len;
-}
-
-
 #define INA2XX_CHAN(_type, _index, _address) { \
 	.type = _type, \
 	.address = _address, \
@@ -349,6 +317,7 @@ static ssize_t ina2xx_averaging_steps_store(struct device *dev,
 	.channel = (_index), \
 	.info_mask_separate = BIT(IIO_CHAN_INFO_RAW), \
 	.info_mask_shared_by_dir = BIT(IIO_CHAN_INFO_SAMP_FREQ) | \
+				   BIT(IIO_CHAN_INFO_AVERAGING_RATIO) | \
 				   BIT(IIO_CHAN_INFO_CALIBSCALE), \
 	.scan_index = (_index), \
 	.scan_type = { \
@@ -382,13 +351,9 @@ static int ina2xx_debug_reg(struct iio_dev *indio_dev,
 /* frequencies matching the cummulated integration times for vshunt and vbus */
 static IIO_CONST_ATTR_SAMP_FREQ_AVAIL("61 120 236 455 850 1506 2450 3571");
 
-static IIO_DEVICE_ATTR(in_averaging_steps, S_IRUGO | S_IWUSR,
-		       ina2xx_averaging_steps_show,
-		       ina2xx_averaging_steps_store, 0);
-
 static struct attribute *ina2xx_attributes[] = {
-	&iio_dev_attr_in_averaging_steps.dev_attr.attr,
 	&iio_const_attr_sampling_frequency_available.dev_attr.attr,
+	&iio_const_attr_averaging_ratio_available.dev_attr.attr,
 	NULL,
 };
 
