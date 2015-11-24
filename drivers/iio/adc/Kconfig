@@ -170,6 +170,16 @@ config EXYNOS_ADC
 	  of SoCs for drivers such as the touchscreen and hwmon to use to share
 	  this resource.
 
+config INA2XX_IIO
+	tristate "Texas Instruments INA2xx Power Monitors IIO driver"
+	depends on I2C
+	select REGMAP_I2C
+	select IIO_BUFFER
+	help
+	  Say yes here to build support for TI INA2xx familly Power Monitors.
+
+	  Note that this is not the existing hwmon interface for this device.
+
 config LP8788_ADC
 	tristate "LP8788 ADC driver"
 	depends on MFD_LP8788
